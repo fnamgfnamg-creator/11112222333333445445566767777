@@ -1,0 +1,67 @@
+name: fer3oon
+description: FER3OON Trading Platform
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI & Animations
+  cupertino_icons: ^1.0.6
+  animate_do: ^3.1.2
+  flutter_animate: ^4.3.0
+  
+  # WebView
+  webview_flutter: ^4.4.2
+  
+  # HTTP & API
+  http: ^1.1.2
+  dio: ^5.4.0
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  
+  # Device Info
+  device_info_plus: ^9.1.1
+  
+  # Notifications
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.9
+  flutter_local_notifications: ^16.3.0
+  
+  # URL Launcher
+  url_launcher: ^6.2.2
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Utilities
+  intl: ^0.19.0
+  connectivity_plus: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/animations/
+  
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
