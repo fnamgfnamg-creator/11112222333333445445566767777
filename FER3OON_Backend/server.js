@@ -22,7 +22,7 @@ app.use(helmet());
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman / mobile apps
+    if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -112,24 +112,16 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(
-╔═══════════════════════════════════════╗
-║     🚀 FER3OON Backend API Started    ║
-╠═══════════════════════════════════════╣
-║  Port: ${PORT}                          
-║  Environment: ${process.env.NODE_ENV || 'development'}
-║  MongoDB: Connected
-╚═══════════════════════════════════════╝
-  );
+  console.log("Server started on port " + PORT);
 });
 
 // Graceful Shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
+  console.log('SIGTERM received, shutting down...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
+  console.log('SIGINT received, shutting down...');
   process.exit(0);
 });
