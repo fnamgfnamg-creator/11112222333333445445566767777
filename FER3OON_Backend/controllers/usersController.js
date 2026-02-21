@@ -1,4 +1,169 @@
 
+const User = require('../models/user');
+
+// ========================================
+// MOBILE APP FUNCTIONS (Public - No Auth)
+// ========================================
+
+// Register or login user
+exports.registerUser = async (req, res) => {
+  try {
+    const { uid, deviceId } = req.body;
+
+    if (!uid || !deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'UID and Device ID are required'
+      });
+    }
+
+    // AUTO BLOCK LOGIC: Check if UID exists with different device
+    const existingUsers = await User.find({ uid });
+    
+    if (existingUsers.length > 0) {
+      const existingDeviceIds = existingUsers.map(u => u.deviceId);
+      
+      // If this UID exists with a different device ID - BLOCK ALL
+      if (!existingDeviceIds.includes(deviceId)) {
+        await User.updateMany(
+          { uid },
+          { 
+            status: 'BLOCKED',
+            blockedReason: 'Multiple device login detected'
+          }
+        );
+
+        const newUser = new User({
+          uid,
+          deviceId,
+          status: 'BLOCKED',
+          blockedReason: 'Multiple device login detected'
+        });
+        await newUser.save();
+
+        return res.status(403).json({
+          success: false,
+          message: 'This account has been blocked due to multiple device login',
+          status: 'BLOCKED'
+        });
+      }
+      
+      // Same device - update last login
+      const user = existingUsers.find(u => u.deviceId === deviceId);
+      if (user) {
+        user.lastLogin = new Date();
+        await user.save();
+        return res.json({
+          success: true,
+          user: {
+            uid: user.uid,
+            deviceId: user.deviceId,
+            status: user.status,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin
+          }
+        });
+      }
+    }
+
+    // New user - create as PENDING
+    const newUser = new User({
+      uid,
+      deviceId,
+      status: 'PENDING'
+    });
+    await newUser.save();
+
+    res.status(201).json({
+      success: true,
+      user: {
+        uid: newUser.uid,
+        deviceId: newUser.deviceId,
+        status: newUser.status,
+        createdAt: newUser.createdAt,
+        lastLogin: newUser.lastLogin
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration',
+      error: error.message
+    });
+  }
+};
+
+// Check user status
+exports.checkStatus = async (req, res) => {
+  try {
+    const { uid, deviceId } = req.query;
+
+    if (!uid || !deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'UID and Device ID are required'
+      });
+    }
+
+    const user = await User.findOne({ uid, deviceId });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      status: user.status,
+      blockedReason: user.blockedReason
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// Generate signal (hour-based bias system)
+let currentHourBias = null;
+let lastHourCheck = null;
+
+exports.generateSignal = async (req, res) => {
+  try {
+    const { uid, deviceId } = req.body;
+
+    if (!uid || !deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'UID and Device ID are required'
+      });
+    }
+
+    // Check user exists and is approved
+    const user = await User.findOne({ uid, deviceId });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.status !== 'APPROVED') {
+      return res.status(403).json({
+        success: false,
+        message: 'User not approved'
+      });
+    }
+
+    const now = new Date();
+    const currentSecond = now.getSeconds();
+
+X TRADER, [2/21/2026 1:58 PM]
 // Only generate signal at the start of a new minute (0-5 seconds)
     if (currentSecond > 5) {
       return res.status(400).json({
@@ -66,7 +231,7 @@
 };
 
 // ========================================
-// ADMIN DASHBOARD FUNCTIONS
+// ADMIN DASHBOARD FUNCTIONS (Auth Required)
 // ========================================
 
 // Get all users
@@ -183,7 +348,7 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-EL FER3OON, [2/21/2026 1:50 PM]
+X TRADER, [2/21/2026 1:58 PM]
 res.json({
       success: true,
       message: 'User deleted successfully'
