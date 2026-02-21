@@ -12,17 +12,31 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// Allowed Origins
+const allowedOrigins = [
+  "https://sec-production-fe4a.up.railway.app"
+];
+
 // Security Middleware
 app.use(helmet());
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman / mobile apps
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api/', limiter);
@@ -96,8 +110,9 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`
+  console.log(
 ╔═══════════════════════════════════════╗
 ║     🚀 FER3OON Backend API Started    ║
 ╠═══════════════════════════════════════╣
@@ -105,7 +120,7 @@ app.listen(PORT, () => {
 ║  Environment: ${process.env.NODE_ENV || 'development'}
 ║  MongoDB: Connected
 ╚═══════════════════════════════════════╝
-  `);
+  );
 });
 
 // Graceful Shutdown
