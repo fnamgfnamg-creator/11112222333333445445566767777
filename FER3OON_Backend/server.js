@@ -18,6 +18,8 @@ connectDB();
 // Allowed Origins
 const allowedOrigins = [
   "https://sec-production-fe4a.up.railway.app"
+  "http://localhost:5173",
+  "http://localhost:3000"
 ];
 
 // Security Middleware
