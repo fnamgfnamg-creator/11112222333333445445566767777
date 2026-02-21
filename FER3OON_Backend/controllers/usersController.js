@@ -1,4 +1,3 @@
-
 const User = require('../models/user');
 
 // ========================================
@@ -162,8 +161,8 @@ exports.generateSignal = async (req, res) => {
 
     const now = new Date();
     const currentSecond = now.getSeconds();
-    
-// Only generate signal at the start of a new minute (0-5 seconds)
+
+    // Only generate signal at the start of a new minute (0-5 seconds)
     if (currentSecond > 5) {
       return res.status(400).json({
         success: false,
@@ -316,9 +315,9 @@ exports.updateUserStatus = async (req, res) => {
     }
     await user.save();
 
-   res.json({
+    res.json({
       success: true,
-      message: User status updated to ${status},
+      message: 'User status updated to ' + status,
       user: {
         uid: user.uid,
         status: user.status
@@ -346,7 +345,8 @@ exports.deleteUser = async (req, res) => {
         message: 'User not found'
       });
     }
-res.json({
+
+    res.json({
       success: true,
       message: 'User deleted successfully'
     });
