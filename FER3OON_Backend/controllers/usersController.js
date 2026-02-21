@@ -1,4 +1,73 @@
-const User = require('../models/user');
+
+// Only generate signal at the start of a new minute (0-5 seconds)
+    if (currentSecond > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Signal can only be generated at the start of a new minute',
+        waitSeconds: 60 - currentSecond
+      });
+    }
+
+    // Check hour-based bias
+    const currentHour = now.getHours();
+    
+    // If hour changed, switch bias
+    if (lastHourCheck !== currentHour) {
+      // Alternate between CALL-heavy and PUT-heavy hours
+      currentHourBias = (currentHour % 2 === 0) ? 'CALL' : 'PUT';
+      lastHourCheck = currentHour;
+    }
+
+    // Generate signal based on bias
+    // 60% bias direction, 40% opposite
+    let signalType;
+    const random = Math.random();
+    
+    if (currentHourBias === 'CALL') {
+      signalType = random < 0.6 ? 'CALL' : 'PUT';
+    } else {
+      signalType = random < 0.6 ? 'PUT' : 'CALL';
+    }
+
+    // Calculate expiry (next minute)
+    const currentMinute = now.getMinutes();
+    const expiryMinute = (currentMinute + 1) % 60;
+
+    // Save signal to history
+    user.signalHistory.push({
+      type: signalType,
+      timestamp: now,
+      expiryMinute
+    });
+
+    // Keep only last 100 signals
+    if (user.signalHistory.length > 100) {
+      user.signalHistory = user.signalHistory.slice(-100);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      signal: {
+        type: signalType,
+        timestamp: now.toISOString(),
+        expiryMinute,
+        duration: 60
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// ========================================
+// ADMIN DASHBOARD FUNCTIONS
+// ========================================
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -78,11 +147,14 @@ exports.updateUserStatus = async (req, res) => {
     }
 
     user.status = status;
+    if (status !== 'BLOCKED') {
+      user.blockedReason = null;
+    }
     await user.save();
 
     res.json({
       success: true,
-      message: `User status updated to ${status}`,
+      message: User status updated to ${status},
       user: {
         uid: user.uid,
         status: user.status
@@ -111,95 +183,10 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    res.json({
+EL FER3OON, [2/21/2026 1:50 PM]
+res.json({
       success: true,
       message: 'User deleted successfully'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// Signal Generation (Hour-based bias system)
-let currentHourBias = null;
-let lastHourCheck = null;
-
-exports.generateSignal = async (req, res) => {
-  try {
-    const { uid } = req.body;
-
-    if (!uid) {
-      return res.status(400).json({
-        success: false,
-        message: 'UID is required'
-      });
-    }
-
-    // Check user exists and is approved
-    const user = await User.findOne({ uid });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.status !== 'APPROVED') {
-      return res.status(403).json({
-        success: false,
-        message: 'User not approved'
-      });
-    }
-
-    const now = new Date();
-    const currentSecond = now.getSeconds();
-
-    // Only generate signal at the start of a new minute (0-5 seconds)
-    if (currentSecond > 5) {
-      return res.status(400).json({
-        success: false,
-        message: 'Signal can only be generated at the start of a new minute'
-      });
-    }
-
-    // Check hour-based bias
-    const currentHour = now.getHours();
-    
-    // If hour changed, switch bias
-    if (lastHourCheck !== currentHour) {
-      // Alternate between CALL-heavy and PUT-heavy hours
-      currentHourBias = (currentHour % 2 === 0) ? 'CALL' : 'PUT';
-      lastHourCheck = currentHour;
-    }
-
-    // Generate signal based on bias
-    // 60% bias direction, 40% opposite
-    let signal;
-    const random = Math.random();
-    
-    if (currentHourBias === 'CALL') {
-      signal = random < 0.6 ? 'CALL' : 'PUT';
-    } else {
-      signal = random < 0.6 ? 'PUT' : 'CALL';
-    }
-
-    // Save signal to history
-    user.signalHistory.push({
-      signal,
-      timestamp: now
-    });
-    await user.save();
-
-    res.json({
-      success: true,
-      signal,
-      timestamp: now.toISOString(),
-      duration: 60
     });
   } catch (error) {
     res.status(500).json({
