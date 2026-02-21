@@ -162,8 +162,7 @@ exports.generateSignal = async (req, res) => {
 
     const now = new Date();
     const currentSecond = now.getSeconds();
-
-X TRADER, [2/21/2026 1:58 PM]
+    
 // Only generate signal at the start of a new minute (0-5 seconds)
     if (currentSecond > 5) {
       return res.status(400).json({
@@ -347,8 +346,6 @@ exports.deleteUser = async (req, res) => {
         message: 'User not found'
       });
     }
-
-X TRADER, [2/21/2026 1:58 PM]
 res.json({
       success: true,
       message: 'User deleted successfully'
