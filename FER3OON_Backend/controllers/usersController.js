@@ -318,7 +318,7 @@ exports.updateUserStatus = async (req, res) => {
 
     res.json({
       success: true,
-      message: User status updated to ${status},
+     message: User status updated to ${status}',
       user: {
         uid: user.uid,
         status: user.status
