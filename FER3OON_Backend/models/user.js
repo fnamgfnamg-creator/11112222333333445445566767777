@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['PENDING', 'APPROVED', 'BLOCKED'],
-    default: 'PENDING'
+    enum: ['pending', 'approved', 'blocked'],  // ✅ Fixed: lowercase
+    default: 'pending'  // ✅ Fixed: lowercase
   },
   signalHistory: [signalHistorySchema],
   createdAt: {
