@@ -9,6 +9,9 @@ const connectDB = require('./config/db');
 // Initialize Express
 const app = express();
 
+// Trust proxy - IMPORTANT for Railway
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
