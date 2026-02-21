@@ -45,7 +45,7 @@ exports.registerUser = async (req, res) => {
   try {
     const { uid, deviceId } = req.body;
 
-    if (!uid  !deviceId) {  // ✅ Fixed:  بدل  
+    if (!uid || !deviceId) {  
       return res.status(400).json({
         success: false,
         message: 'UID and Device ID are required'
@@ -59,7 +59,7 @@ exports.registerUser = async (req, res) => {
       // Check for multiple device login
       if (user.deviceId !== deviceId) {
         // Different device detected - AUTO BLOCK
-        user.status = 'blocked';  // ✅ Fixed: lowercase
+        user.status = 'blocked';
         
         // Block both devices
         user.deviceHistory.push({
@@ -72,7 +72,7 @@ exports.registerUser = async (req, res) => {
         return res.status(403).json({
           success: false,
           message: 'Account blocked due to multiple device login',
-          status: 'blocked'  // ✅ Fixed: lowercase
+          status: 'blocked'
         });
       }
 
@@ -95,7 +95,7 @@ exports.registerUser = async (req, res) => {
     user = new User({
       uid,
       deviceId,
-      status: 'pending',  // ✅ Fixed: lowercase
+      status: 'pending',
       deviceHistory: [{
         deviceId,
         loginAt: new Date()
@@ -107,7 +107,7 @@ exports.registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      status: 'pending',  // ✅ Fixed: lowercase
+      status: 'pending',
       user: {
         uid: user.uid,
         status: user.status
@@ -127,7 +127,7 @@ exports.checkStatus = async (req, res) => {
   try {
     const { uid, deviceId } = req.body;
 
-    if (!uid  !deviceId) {  // ✅ Fixed:  بدل  
+    if (!uid || !deviceId) {  
       return res.status(400).json({
         success: false,
         message: 'UID and Device ID are required'
@@ -148,7 +148,7 @@ exports.checkStatus = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'Device mismatch',
-        status: 'blocked'  // ✅ Fixed: lowercase
+        status: 'blocked'
       });
     }
 
